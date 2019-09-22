@@ -1,0 +1,20 @@
+{
+  "name": "carta-app",
+  "version": "1.0.0",
+  "description": "demonstration application for Carta",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reeedo/carta-app.git"
+  },
+  "author": "larry reed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/reeedo/carta-app/issues"
+  },
+  "homepage": "https://github.com/reeedo/carta-app#readme"
+}
