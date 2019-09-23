@@ -2,6 +2,9 @@ fs = require('fs');
 readline = require('readline');
 moment = require('moment');
 
+// checks the given date for valid formats
+// returns Date object if valid
+// returns null if not valid
 const validateDate = transDate => {
     let d = null;
     try {
@@ -24,15 +27,18 @@ if (process.argv.length < 3) {
 }
 // get the name of file to read
 const fileName = process.argv[2];
+// verify file exists
 if( !fs.existsSync(fileName)) {
     console.log(`File ${fileName} does not exist.`);
     return -1;
 }
 
 // get the latest date for which we desire transactions
+// if date not specified, uses current date
 let latest = validateDate(process.argv[3] || Date.now());
 if (!latest) {
     console.log(`invalid date ${process.argv[3]} entered on command line. Using current date.`);
+    // if invalid date specified, use current date
     latest = new Date();
 }
 
@@ -65,6 +71,12 @@ const readLines = async () => {
 
 const investors = {};
 
+// parses given line and validates the values.
+// if invalid values are found, the line is ignored and a warning displayed
+// if transaction date is later than the request date, the line is ignored
+// builds a table by investor name with accumulated values of all fields
+// line format:
+//   DATE SHARES PRICE INVESTOR
 const addCapLine = (line, num) => {
     // ignore comments
     if (line.length === 0 || line[0] === '#') {
@@ -106,9 +118,11 @@ const addCapLine = (line, num) => {
     } else {
         investors[investor] = { shares, price };
     }
-    // console.log(date, shares, price, investor);
 };
 
+// addes investor data to output object
+// calculates total shares and price 
+// after total shares calculated, updates each investor with share perentage
 const addInvestors = () => {
     // add all the ownership data and compute total cash/shares
     for (investor in investors) {
@@ -133,6 +147,7 @@ const addInvestors = () => {
     }
     return capOutput;
 };
+
 let output;
 readLines()
     .then(() => {
