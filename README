@@ -1,1 +1,45 @@
 Demonstration app for Carta
+
+Input is a file in the following format:
+
+#INVESTMENT DATE, SHARES PURCHASED, CASH PAID, INVESTOR
+2016-04-03,1000,10000.00,Sandy Lerner 
+2017-11-14,1000,12000.00,Don Valentine
+2018-01-20,2000,40000.00,Don Valentine
+2018-03-20,2000,40000.00,Ann Miura-Ko
+2019-01-02,2000,50000.00,Sandy Lerner
+2019-01-02,1500,13500.00,Fred Wilson
+
+lines beginning with '#' are considered to be comments
+
+Output is a json object in the following format:
+
+{
+  "date": "02/01/2019",            // mm/dd/yyyy format date the captable was requested
+                                   // (if no filter is implemented, then today)
+  "cash_raised": 165500.00,        // decimal representing total cash paid by
+                                   // investors up to date
+  "total_number_of_shares": 9500,  // integer representing the total number
+                                   // of shares bought by investors
+  "ownership": [                   // list of investors and their aggregated investments
+      {
+        investor: "Don Valentine", // investor name
+        shares: 3000,              // total amount of shares owned by that given investor
+      	cash_paid: 52000.00,       // total investment made by this investor
+        ownership: 31.58           // decimal representing total investor ownershi
+                                   // (31.58 means 31.58%)
+      },
+      ...
+  ],
+}
+
+Usage:
+    npm start <fileName> [date]
+        <fileName> is the name of the file containing the investor data
+        [date] is an optional date. if specified, only transactions on or before this date are included
+
+Installation:
+    cd <Installation Foleder>
+    npm install 
+    npm start <fileName> [date]
+

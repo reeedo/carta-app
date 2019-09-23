@@ -1,0 +1,141 @@
+fs = require('fs');
+readline = require('readline');
+moment = require('moment');
+
+const validateDate = transDate => {
+    let d = null;
+    try {
+        d = new Date(transDate);
+        if (isNaN(d.getTime())) {
+            d = null;
+        }
+    } catch (err) {
+        console.log(`Error parsing date ${transDate}`)
+    }
+    return d;
+};
+
+// validate command line
+if (process.argv.length < 3) {
+   console.log('Usage: npm start filename [date]');
+   console.log('    <fileName> is the name of the file containing the investor data');
+   console.log('    [date] is an optional date. if specified, only transactions on or before this date are included ');
+   return(-1);
+}
+// get the name of file to read
+const fileName = process.argv[2];
+if( !fs.existsSync(fileName)) {
+    console.log(`File ${fileName} does not exist.`);
+    return -1;
+}
+
+// get the latest date for which we desire transactions
+let latest = validateDate(process.argv[3] || Date.now());
+if (!latest) {
+    console.log(`invalid date ${process.argv[3]} entered on command line. Using current date.`);
+    latest = new Date();
+}
+
+const capOutput = {
+    date: moment(latest).utc().format('MM/DD/YYYY'),
+    cash_raised: 0,
+    total_number_of_shares: 0,
+    ownership: []
+};
+
+console.log('Recording transactions up to and including', capOutput.date);
+
+// process file line by line
+const readLines = async () => {
+    // open file as stream
+    const fstream = fs.createReadStream(fileName);
+    // create line reader
+    const readOneLine = readline.createInterface({
+        input: fstream,
+        crlfDelay: Infinity     // treat crlf as single newline
+    });
+    // now read the lines and add to our table
+    let lineNum = 0;
+    for await (const line of readOneLine) {
+        // remove excess space and parse line
+        addCapLine(line.trim(), lineNum);
+        lineNum++;
+    }
+};
+
+const investors = {};
+
+const addCapLine = (line, num) => {
+    // ignore comments
+    if (line.length === 0 || line[0] === '#') {
+        return;
+    }
+    // split line into list of values
+    let [transDate, shareCt, cost, investor] = line.split(',');
+    // validate arguments 
+    const transactionDate = validateDate(transDate);
+    if (!transactionDate) {
+        console.log(`ignoring transaction on line ${num} is with invalid date "${transDate}"`);
+        return;
+    }
+    // convert to integer and validate
+    shares = parseInt(shareCt, 10);
+    if (isNaN(shares)) {
+        console.log(`ignoring transaction on line ${num} with invalid number of shares "${shareCt}"`);
+        return;
+    }
+    price = parseFloat(cost);
+    if (isNaN(price)) {
+        console.log(`ignoring transaction on line ${num} with invalid price "${cost}"`);
+        return;
+    }
+    if (!investor || investor === '') {
+        console.log(`ignoring transaction on line ${num} with invalid investor name "${investor}"`);
+        return;
+    }
+    // ignore dates after specified latest
+    if (transactionDate > latest) {
+        console.log('ignoring transaction on line ', num, 'dated', transactionDate, '- after', capOutput.date);
+        return;
+    }
+    // add or udate ownership by investor
+    if(investor in investors) {
+        const investorData = investors[investor];
+        investorData.shares += shares;
+        investorData.price += price;
+    } else {
+        investors[investor] = { shares, price };
+    }
+    // console.log(date, shares, price, investor);
+};
+
+const addInvestors = () => {
+    // add all the ownership data and compute total cash/shares
+    for (investor in investors) {
+        let investorData = investors[investor];
+        capOutput.cash_raised += investorData.price;
+        capOutput.total_number_of_shares += investorData.shares;
+        capOutput.ownership.push({
+            investor,
+            shares: investorData.shares,
+            cash_paid: investorData.price
+        });
+    }
+    if( capOutput.ownership.length === 0) {
+        console.log("Warning: no investors found");
+    } else {
+        // now that we have the totals, compute the ownership share for each investor
+        capOutput.ownership.forEach((investor, ix) => {
+            investor.ownership = investor.shares/capOutput.total_number_of_shares;
+            // convert to percentage and round to two decimals
+            investor.ownership = Math.round(investor.ownership*10000)/100;
+        });
+    }
+    return capOutput;
+};
+let output;
+readLines()
+    .then(() => {
+        output = addInvestors();
+        console.log(output);
+    });

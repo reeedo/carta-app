@@ -4,17 +4,10 @@
   "description": "demonstration application for Carta",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "jest"
+    "start": "node --no-warnings src/index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/reeedo/carta-app.git"
-  },
-  "author": "larry reed",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/reeedo/carta-app/issues"
-  },
-  "homepage": "https://github.com/reeedo/carta-app#readme"
+  "dependencies": {
+    "moment": "^2.24.0"
+  }
 }
