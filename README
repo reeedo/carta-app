@@ -40,8 +40,12 @@ Usage:
 
 Installation:
     cd <Installation Foleder>
-    npm install 
-    npm start <fileName> [date]
+    npm install
+
+Run:
+    node src/index.js <fileName> [date]
+or:
+    npm start <filename> [date]
 
 Sample Data:
     data/investments.csv

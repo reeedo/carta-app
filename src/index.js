@@ -20,7 +20,7 @@ const validateDate = transDate => {
 
 // validate command line
 if (process.argv.length < 3) {
-   console.log('Usage: npm start filename [date]');
+   console.log('Usage: node filename [date]');
    console.log('    <fileName> is the name of the file containing the investor data');
    console.log('    [date] is an optional date. if specified, only transactions on or before this date are included ');
    return(-1);
@@ -29,8 +29,16 @@ if (process.argv.length < 3) {
 const fileName = process.argv[2];
 // verify file exists
 if( !fs.existsSync(fileName)) {
-    console.log(`File ${fileName} does not exist.`);
+    console.log(`File "${fileName}" does not exist.`);
     return -1;
+}
+// generate output filename
+let outputName = fileName;
+if (fileName.indexOf('.csv') !== -1) {
+    // has .csv, change to .json
+    outputName = fileName.replace('.csv', '.json');
+} else {
+    outputName = outputName + '.json';
 }
 
 // get the latest date for which we desire transactions
@@ -49,7 +57,7 @@ const capOutput = {
     ownership: []
 };
 
-console.log('Recording transactions up to and including', capOutput.date);
+console.log(`'Recording transactions up to and including ${capOutput.date} in file ${outputName}`);
 
 // process file line by line
 const readLines = async () => {
@@ -148,9 +156,15 @@ const addInvestors = () => {
     return capOutput;
 };
 
-let output;
 readLines()
     .then(() => {
-        output = addInvestors();
-        console.log(output);
+        const output = addInvestors();
+        const jsonContent = JSON.stringify(output);
+        console.log(`Writing output to file "${outputName}"...`)
+        fs.writeFile(outputName, jsonContent, (err) => {
+            if (err) {
+                console.log(`Error writing file "${outputName}":`);
+                console.log(err);    
+            }
+        });
     });
