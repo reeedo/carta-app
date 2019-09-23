@@ -52,10 +52,13 @@ Sample Data:
     data/badData.csv
 
 Testing:
-    npm start  # validate show usage when no arguments
-    npm start data/investments.csv # shows correct output for correct input 
-    npm start data/investments.csv 2017-12-31 # shows correct output for data prior to specified date
-    npm start data/badData.csv # shows error handling for various bad data cases 
-    npm start data/bla # shows error handling for missing file
-    npm start data/investments.csv xxxx-xx-xx # shows correct handling of invalid date entered
+    npm test 
+
+    runs the following tests:
+     * validate show usage when no arguments
+     * shows correct output for correct input 
+     * shows correct output for data prior to specified date
+     * shows error handling for various bad data cases 
+     * shows error handling for missing file
+     * shows correct handling of invalid date entered
 
