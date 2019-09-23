@@ -1,0 +1,5 @@
+
+> carta-app@1.0.0 start /Users/reeedo/Documents/dev/proj/carta-app
+> node --no-warnings src/index.js "data/bla"
+
+File "data/bla" does not exist.

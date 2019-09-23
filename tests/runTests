@@ -1,0 +1,56 @@
+#! /bin/bash
+# clear out test results
+rm *.log
+rm data/*.json
+# validate show usage when no arguments
+npm start > out.log
+if cmp -s out.log tests/log/noargs.log ; then
+    echo "No Args test passed"
+    rm out.log
+else
+    echo "No Args test failed"
+fi
+# shows correct output for correct input 
+npm start data/investments.csv
+# need special comparison that ignores date when date is now
+node src/cmpJson.js data/investments.json tests/log/investmentsNow.json
+if [ $? -eq 0 ]; then
+    echo "Valid data test passed"
+    rm data/investments.json
+else
+    echo "Valid data test failed"
+fi
+# shows correct output for data prior to specified date
+npm start data/investments.csv 2017-12-31
+if cmp -s data/investments.json tests/log/investments2017.json ; then
+    echo "Filtered data test passed"
+    rm data/investments.json
+else
+    echo "Filtered data test failed"
+fi
+# shows error handling for various bad data cases 
+npm start data/badData.csv > out.log
+if cmp -s out.log tests/log/badData.log ; then
+    echo "Bad data test passed"
+    rm out.log
+else
+    echo "Bad data test failed"
+fi
+# shows error handling for missing file
+npm start data/bla > out.log
+if cmp -s out.log tests/log/nofile.log ; then
+    echo "No file test passed"
+    rm out.log
+else
+    echo "No file test failed"
+fi
+# shows correct handling of invalid date entered
+npm start data/investments.csv xxxx-xx-xx
+# need special comparison that ignores date when date is now
+node src/cmpJson.js data/investments.json tests/log/investmentsNow.json
+if [ $? -eq 0 ]; then
+    echo "Invalid Date test passed"
+    rm data/investments.json
+else
+    echo "Invalid Date test failed"
+fi

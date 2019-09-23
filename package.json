@@ -4,7 +4,8 @@
   "description": "demonstration application for Carta",
   "main": "index.js",
   "scripts": {
-    "start": "node --no-warnings src/index.js"
+    "start": "node --no-warnings src/index.js",
+    "test": "tests/runTests"
   },
   "license": "ISC",
   "dependencies": {
